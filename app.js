@@ -3,44 +3,44 @@ import contractABI from './contractABI.json';
 require('dotenv').config();
 
 const contractAddress = process.env.CONTRACT_ADDRESS; 
-let selectedAccount;
-let tokenContract;
-let web3;
+let currentUserAccount;
+let cryptoTokenContract;
+let web3Instance;
 
-const init = async () => {
+const initializeWallet = async () => {
     if (window.ethereum) { 
         try {
-            web3 = new Web3(window.ethereum);
+            web3Instance = new Web3(window.ethereum);
             await window.ethereum.request({ method: 'eth_requestAccounts' }); 
-            const accounts = await web3.eth.getAccounts();
-            selectedAccount = accounts[0]; 
-            tokenContract = new web3.eth.Contract(contractABI, contractAddress); 
-            updateUI(); 
+            const accounts = await web3Instance.eth.getAccounts();
+            currentUserAccount = accounts[0]; 
+            cryptoTokenContract = new web3Instance.eth.Contract(contractABI, contractAddress); 
+            refreshUI(); 
         } catch (error) {
-            console.error("Error accessing the Ethereum accounts", error);
+            console.error("Error while accessing Ethereum accounts: ", error);
         }
     } else {
-        console.error("MetaMask is not installed");
+        console.error("Error: MetaMask extension is not detected.");
     }
 };
 
-const getTokenBalance = async () => {
-    const balance = await tokenContract.methods.balanceOf(selectedAccount).call();
-    return balance;
+const fetchTokenBalance = async () => {
+    const tokenBalance = await cryptoTokenContract.methods.balanceOf(currentUserAccount).call();
+    return tokenTokenBalance;
 };
 
-const updateUI = async () => {
+const refreshUI = async () => {
     try {
-        const balance = await getTokenBalance();
-        document.getElementById('tokenBalance').innerText = `Your Balance: ${balance}`;
+        const balance = await fetchTokenBalance();
+        document.getElementById('tokenBalance').innerText = `Your Token Balance: ${balance}`;
     } catch (error) {
-        console.error("Error updating the UI", error);
+        console.error("Error encountered during UI update: ", error);
     }
 };
 
 window.ethereum.on('accountsChanged', async (accounts) => {
-    selectedAccount = accounts[0];
-    updateUI(); 
+    currentUserAccount = accounts[0];
+    refreshUI(); 
 });
 
-init();
+initializeWallet();
