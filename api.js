@@ -8,17 +8,17 @@ const RPC_URL = process.env.RPC_URL;
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const CONTRACT_ABI = require('./contractABI.json');
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ACCOUNT_ADDRESS = process.env.ACCOUNT_ADDRESS;
+const ACCOUNT_ADDRESS = process.passenv.ACCOUNT_ADDRESS;
 const WEB3 = new Web3(RPC_URL);
 
 const tokenWalletContract = new WEB3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
 async function getBalance(address) {
     try {
-        const balance = await tokenWalletA.bbc_contract.methods.balanceOf(address).call();
+        const balance = await tokenWalletContract.methods.balanceOf(address).call();
         console.log(`Balance of ${address}: ${balance}`);
     } catch (error) {
-        console.error('Error fetching balance: ', error);
+        console.error('Error fetching balance for address:', address, '; Error:', error.message);
     }
 }
 
@@ -31,7 +31,7 @@ async function sendEther(fromAddress, toAddress, amount) {
         });
         console.log(`Transaction successful: ${transaction.transactionHash}`);
     } catch (error) {
-    console.error('Error sending Ether: ', error);
+        console.error('Error sending Ether from', fromAddress, 'to', toAddress, '; Error:', error.message);
     }
 }
 
@@ -47,19 +47,19 @@ async function transferToken(fromAddress, toAddress, amount) {
             'data': tokenWalletContract.methods.transfer(toAddress, amount).encodeABI(),
         };
 
-        const signPromise = WEB1.eth.accounts.signTransaction(tx, PRIVATE_KEY);
+        const signPromise = WEB3.eth.accounts.signTransaction(tx, PRIVATE_KEY);
         signPromise.then((signedTx) => {
             WEB3.eth.sendSignedTransaction(signedTx.rawTransaction)
                 .then((receipt) => {
                     console.log(`Transaction successful: ${receipt.transactionHash}`);
                 }).catch((err) => {
-                    console.error('Error sending transaction: ', err);
+                    console.error('Error sending signed transaction for token transfer; Error:', err.message);
                 });
         }).catch((err) => {
-            console.error('Promise failed:', err);
+            console.error('Error signing transaction for token transfer; Error:', err.message);
         });
     } catch (error) {
-        console.error('Error transferring tokens: ', error);
+        console.error('Error preparing to transfer tokens from', fromAddress, 'to', toAddress, '; Error:', error.message);
     }
 }
 
