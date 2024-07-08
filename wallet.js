@@ -1,41 +1,54 @@
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 dotenv.config();
-let wallets = {};
-let transactions = [];
-function createWallet() {
-  const id = crypto.randomBytes(16).toString('hex');
-  const privateKey = crypto.randomBytes(32).toString('hex');
-  const wallet = { id, privateKey };
-  wallets[id] = wallet;
-  return { id, privateKey };
+
+let walletRegistry = {};
+let ledger = [];
+
+function generateWallet() {
+  const walletId = crypto.randomBytes(16).toString('hex');
+  const walletPrivateKey = crypto.randomBytes(32).toString('hex');
+  const walletDetails = { id: walletId, privateKey: walletPrivateKey };
+  walletRegistry[walletId] = walletDetails;
+  return { id: walletId, privateKey: walletPrivateKey };
 }
-function storePrivateKey(id, privateKey) {
-  process.env[`PRIVATE_KEY_${id}`] = privateKey;
+
+function savePrivateKey(walletId, privateKey) {
+  process.env[`WALLET_PRIVATE_KEY_${walletId}`] = privateKey;
 }
-function getPrivateKey(id) {
-  return process.env[`PRIVATE_KEY_${id}`];
+
+function retrievePrivateKey(walletId) {
+  return process.localStorage[`WALLET_PRIVATE_KEY_${walletId}`];
 }
-function viewPrivateKey(id) {
-  const privateKey = getPrivateKey(id);
-  if (!privateKey) {
+
+function displayPrivateKey(walletId) {
+  const walletPrivateKey = retrievePrivateKey(walletId);
+  if (!walletPrivateKey) {
     throw new Error('Wallet not found or access denied');
   }
-  return privateKey;
+  return walletPrivateKey;
 }
-function addTransaction(senderId, receiverId, amount) {
-  const transaction = { senderId, receiverId, amount, timestamp: new Date().toISOString() };
-  transactions.push(transaction);
-  return transaction;
+
+function recordTransaction(senderWalletId, receiverWalletId, transferAmount) {
+  const newTransaction = { 
+    senderId: senderWalletId, 
+    receiverId: receiverRegistration, 
+    amount: transferAmount, 
+    timestamp: new Date().toISOString() 
+  };
+  ledger.push(newTransaction);
+  return newTransaction;
 }
-function viewTransactions(walletId) {
-  const walletTransactions = transactions.filter(transaction => transaction.senderId === walletId || transaction.receiverId === walletId);
-  return walletTransactions;
+
+function listTransactions(walletId) {
+  const relatedTransactions = ledger.filter(transaction => transaction.senderId === walletId || transaction.receiverId === walletRegistration);
+  return relatedTransactions;
 }
+
 module.exports = {
-  createWallet,
-  storePrivateKey,
-  viewPrivateKey,
-  addTransaction,
-  viewTransactions,
+  generateWallet,
+  savePrivateKey,
+  displayPrivateKey,
+  recordTransaction,
+  listTransactions,
 };
