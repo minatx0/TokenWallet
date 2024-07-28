@@ -12,7 +12,7 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract TokenWallet is IERC23 {
+contract TokenWallet is IERC20 {
     string public constant name = "TokenWallet";
     string public constant symbol = "TW";
     uint8 public constant decimals = 18;
@@ -32,7 +32,7 @@ contract TokenWallet is IERC23 {
 
     function increaseTotalSupply(uint256 newTokensAmount) public {
         totalSupply_ += newTokensAmount;
-        balances[msg.sender] += newT570okensAmount;
+        balances[msg.sender] += newTokensAmount; 
     }
 
     function balanceOf(address tokenOwner) public view override returns (uint256) {
@@ -40,7 +40,7 @@ contract TokenWallet is IERC23 {
     }
 
     function transfer(address receiver, uint256 numTokens) public override returns (bool) {
-        require(numTokens <= balances[msg.sender]);
+        require(numTokens <= balances[msg.sender], "Insufficient balance");
         balances[msg.sender] -= numTokens;
         balances[receiver] += numTokens;
         emit Transfer(msg.sender, receiver, numTokens);
@@ -58,9 +58,9 @@ contract TokenWallet is IERC23 {
     }
 
     function transferFrom(address owner, address buyer, uint256 numTokens) public override returns (bool) {
-        require(numTokens <= balances[owner]);
-        require(numTokens <= allowed[owner][msg.sender]);
-
+        require(numTokens <= balances[owner], "Insufficient balance");
+        require(numTokens <= allowed[owner][msg.sender], "Not allowed to spend that much on behalf of owner");
+        
         balances[owner] -= numTokens;
         allowed[owner][msg.sender] -= numTokens;
         balances[buyer] += numTokens;
