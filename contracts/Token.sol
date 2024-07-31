@@ -17,9 +17,9 @@ contract TokenWallet is IERC20 {
     string public constant symbol = "TW";
     uint8 public constant decimals = 18;
 
-    mapping(address => uint256) balances;
-    mapping(address => mapping (address => uint256)) allowed;
-    uint256 totalSupply_;
+    mapping(address => uint256) private balances;
+    mapping(address => mapping (address => uint256)) private allowed;
+    uint256 private totalSupply_;
 
     constructor(uint256 total) {
         totalSupply_ = total;
@@ -35,7 +35,7 @@ contract TokenWallet is IERC20 {
         balances[msg.sender] += newTokensAmount; 
     }
 
-    function balanceOf(address tokenOwner) public view override returns (uint256) {
+    function balanceOf(address tokenOwner) public view override returns (uint256 balance) {
         return balances[tokenOwner];
     }
 
